@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration scan="true">
+	<!-- properties -->
+	<property name="LOG_FILE_GENERAL" value="./log/pub-sub-ms-app.log" />
+	<property name="LOG_FILE_LABELS" value="./log/pub-sub-ms-labels.log" />
+	<property name="pattern_app"
+		value="TID: [%thread] [%d] %5p {%c} - \\(Retries:%X{Retries}, Correlation:%X{CorrelationId}, Environment:%X{Environment}, Event-type:%X{Event-Type}, Originator-Source:%X{Originator-Source}\\) =
+				%msg%n" />
+	<property name="pattern_others" value="%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n" />
+
+	<!-- appenders -->
+	<appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+		<encoder>
+			<charset>UTF-8</charset>
+			<Pattern>${pattern_app}</Pattern>
+		</encoder>
+	</appender>
+
+	<appender name="APPENDER_GENERAL" class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<encoder>
+			<pattern>${pattern_others}</pattern>
+		</encoder>
+		<file>${LOG_FILE_GENERAL}</file>
+		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<!-- daily rollover -->
+			<fileNamePattern>${LOG_FILE_GENERAL}.%d</fileNamePattern>
+			<maxHistory>1</maxHistory>
+		</rollingPolicy>
+	</appender>
+	
+	<appender name="APPENDER_LABELS" class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<encoder>
+			<pattern>${pattern_app}</pattern>
+		</encoder>
+		<file>${LOG_FILE_LABELS}</file>
+		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<!-- daily rollover -->
+			<fileNamePattern>${LOG_FILE_LABELS}.%d</fileNamePattern>
+			<maxHistory>1</maxHistory>
+		</rollingPolicy>
+	</appender>
+	
+
+	<!-- appenders filtered -->
+	<appender name="CONSOLE_FILTER" class="ch.qos.logback.core.ConsoleAppender">
+		<filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+			<level>ERROR</level>
+		</filter>
+		<encoder>
+			<charset>UTF-8</charset>
+			<Pattern>${pattern_others}</Pattern>
+		</encoder>
+	</appender>
+
+	<!-- loggers -->
+	<logger name="org.springframework" level="ERROR" additivity="false">
+		<appender-ref ref="CONSOLE_FILTER" />
+		<appender-ref ref="APPENDER_GENERAL" />
+	</logger>
+	
+	<logger name="org.apache" level="ERROR" additivity="false">
+		<appender-ref ref="CONSOLE_FILTER" />
+		<appender-ref ref="APPENDER_GENERAL" />
+	</logger>
+	
+	<logger name="uk.gov.hmrc.des.pubsub.listener" level="DEBUG" additivity="false">
+		<appender-ref ref="CONSOLE" />
+		<appender-ref ref="APPENDER_LABELS" />
+	</logger>
+
+	<!-- root -->
+	<root level="DEBUG">
+		<appender-ref ref="CONSOLE" />
+		<appender-ref ref="APPENDER_LABELS" />
+		<appender-ref ref="APPENDER_GENERAL" />
+	</root>
+</configuration>
